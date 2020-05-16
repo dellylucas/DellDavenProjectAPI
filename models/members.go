@@ -2,41 +2,46 @@ package models
 
 import (
 	"DellDaven_API/repository"
+	"errors"
 	"github.com/astaxie/beego/orm"
-	"log"
+)
+
+var (
+	UserList map[string]*Members
 )
 
 //Members
 type Members struct {
-	ID        int    `orm:"column(ID)"`
-	Usernamew string `orm:"column(Usernamew)" json:"usernamew"`
-	Passwordw string `orm:"column(Passwordw)" json:"passwordw"`
+	Id       int    `json:"id"`
+	Username string `orm:"column(username)" json:"username"`
+	Pass     string `orm:"column(pass)" json:"pass"`
+	Admin    bool   `orm:"column(admin)" json:"admin"`
 }
 
 func init() {
 	orm.RegisterModel(new(Members))
 }
 
-func AddUser(u Members) int {
-	u.ID = 0
-	return u.ID
+func AddUser(u *Members) (id int64, err error) {
+	db := repository.GetSession()
+	count, err := db.QueryTable(u).Filter("username", u.Username).Count()
+	if count == 0 {
+		id, err = db.InsertOrUpdate(u)
+	} else {
+		err = errors.New("-1")
+	}
+
+	return id, err
 }
 
-/*
-func GetUser(uid string) (u *User, err error) {
-	if u, ok := UserList[uid]; ok {
-		return u, nil
-	}
-	return nil, errors.New("User not exists")
-}*/
+func GetAllUsers() map[string]*Members {
+	return UserList
+}
 
-func GetAllUsers(user *Members) {
+func Login(username, password string) (userLog Members, err error) {
 	db := repository.GetSession()
-
-	if _, err := db.InsertOrUpdate(user); err != nil {
-		log.Println(err)
-	}
-	//return user
+	err = db.QueryTable(userLog).Filter("username", username).Filter("pass", password).One(&userLog)
+	return userLog, err
 }
 
 /*

@@ -2,19 +2,17 @@ package repository
 
 import (
 	"fmt"
-	"log"
-
 	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
 )
 
 const (
 	dbAlias       = "default"
-	mysqlUser     = "root"      //"testapp"
-	mysqlPassword = "Mirror123" //"abc123"
+	mysqlUser     = "root"
+	mysqlPassword = "Mirror123"
 	mysqlHost     = "localhost"
 	mysqlPort     = 3306
-	mysqlDatabase = "dbTest"
+	mysqlDatabase = "dbprojectdeda"
 	mysqlCharset  = "utf8"
 )
 
@@ -40,13 +38,10 @@ func init() {
 
 //GetSession - conexion de Base de Datos
 func GetSession() orm.Ormer {
-
-	force := true   // Drop table and re-create.
+	/*force := true   // Drop table and re-create.
 	verbose := true // Print log
-	if err := orm.RunSyncdb(dbAlias, force, verbose); err != nil {
-		log.Println(err)
-	}
-
+	_= orm.RunSyncdb(dbAlias, force, verbose)
+	*/
 	session := orm.NewOrm()
 	session.Using(dbAlias)
 

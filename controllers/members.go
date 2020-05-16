@@ -3,7 +3,6 @@ package controllers
 import (
 	"DellDaven_API/models"
 	"encoding/json"
-
 	"github.com/astaxie/beego"
 )
 
@@ -14,15 +13,19 @@ type UserController struct {
 
 // @Title CreateUser
 // @Description create users
-// @Param	body		body 	models.User	true		"body for user content"
-// @Success 200 {int} models.User.Id
+// @Param	body		body 	models.Members	true		"body for user content"
+// @Success 200 {int} models.Members.Id
 // @Failure 403 body is empty
 // @router / [post]
 func (u *UserController) Post() {
 	var user models.Members
 	json.Unmarshal(u.Ctx.Input.RequestBody, &user)
-	uid := models.AddUser(user)
-	u.Data["json"] = map[string]int{"uid": uid}
+	id, err := models.AddUser(&user)
+	if err != nil {
+		u.Data["json"] = err.Error()
+	} else {
+		u.Data["json"] = id
+	}
 	u.ServeJSON()
 }
 
@@ -31,13 +34,8 @@ func (u *UserController) Post() {
 // @Success 200 {object} models.User
 // @router / [get]
 func (u *UserController) GetAll() {
-	var user models.Members
-	user.ID = 3
-	user.Usernamew = "slene"
-	user.Passwordw = "sleneww"
-
-	models.GetAllUsers(&user)
-	u.Data["json"] = "okkkk"
+	users := models.GetAllUsers()
+	u.Data["json"] = users
 	u.ServeJSON()
 }
 
