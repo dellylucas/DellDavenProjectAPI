@@ -20,11 +20,11 @@ type UserController struct {
 func (u *UserController) Post() {
 	var user models.Members
 	json.Unmarshal(u.Ctx.Input.RequestBody, &user)
-	id, err := models.AddUser(&user)
+	err := models.AddUser(&user)
 	if err != nil {
 		u.Data["json"] = err.Error()
 	} else {
-		u.Data["json"] = id
+		u.Data["json"] = true
 	}
 	u.ServeJSON()
 }
@@ -95,19 +95,23 @@ func (u *UserController) Delete() {
 
 // @Title Login
 // @Description Logs user into the system
-// @Param	username		query 	string	true		"The username for login"
-// @Param	password		query 	string	true		"The password for login"
+// @Param	body		body 	models.Members	true		"body for user content"
 // @Success 200 {string} login success
 // @Failure 403 user not exist
-// @router /login [get]
+// @router /login [post]
 func (u *UserController) Login() {
-	//username := u.GetString("username")
-	//password := u.GetString("password")
-	/*if models.Login(username, password) {
-		u.Data["json"] = "login success"
+	var user models.Members
+	json.Unmarshal(u.Ctx.Input.RequestBody, &user)
+	err := models.Login(&user)
+	if err == nil {
+		if user.Id != 0 {
+			u.Data["json"] = true
+		} else {
+			u.Data["json"] = false
+		}
 	} else {
-		u.Data["json"] = "user not exist"
-	}*/
+		u.Data["json"] = false
+	}
 	u.ServeJSON()
 }
 
