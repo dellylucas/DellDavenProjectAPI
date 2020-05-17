@@ -41,7 +41,7 @@ func GetAllUsers() map[string]*Members {
 
 func Login(user *Members) (err error) {
 	db := repository.GetSession()
-	err = db.QueryTable(user).Filter("username", user.Username).Filter("pass", user.Pass).One(&user)
+	err = db.QueryTable(user).Filter("username", user.Username).Filter("pass", user.Pass).One(user)
 	return err
 }
 
