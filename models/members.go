@@ -2,7 +2,6 @@ package models
 
 import (
 	"DellDaven_API/repository"
-	"errors"
 	"github.com/astaxie/beego/orm"
 )
 
@@ -13,8 +12,8 @@ var (
 //Members
 type Members struct {
 	Id       int    `json:"id"`
-	Username string `orm:"column(username)" json:"username"`
-	Email    string `orm:"column(email)" json:"email"`
+	FullName string `orm:"column(fullname)" json:"fullname"`
+	Email    string `orm:"column(email);unique" json:"email"`
 	Pass     string `orm:"column(pass)" json:"pass"`
 	Admin    bool   `orm:"column(admin)" json:"admin"`
 }
@@ -23,16 +22,22 @@ func init() {
 	orm.RegisterModel(new(Members))
 }
 
-func AddUser(u *Members) (err error) {
+func AddUser(u *Members) (value int32) {
 	db := repository.GetSession()
-	count, err := db.QueryTable(u).Filter("username", u.Username).Count()
-	if count == 0 {
+	count, err := db.QueryTable(u).Filter("email", u.Email).Count()
+	if err == nil && count == 0 {
 		_, err = db.InsertOrUpdate(u)
+		if err == nil {
+			value = 100 //OK
+		} else {
+			value = 300 //error BD
+		}
+	} else if err == nil && count > 0 {
+		value = 200 //ya existe
 	} else {
-		err = errors.New("-1")
+		value = 300 //error BD
 	}
-
-	return err
+	return value
 }
 
 func GetAllUsers() map[string]*Members {
@@ -41,7 +46,7 @@ func GetAllUsers() map[string]*Members {
 
 func Login(user *Members) (err error) {
 	db := repository.GetSession()
-	err = db.QueryTable(user).Filter("username", user.Username).Filter("pass", user.Pass).One(user)
+	err = db.QueryTable(user).Filter("fullname", user.FullName).Filter("pass", user.Pass).One(user)
 	return err
 }
 
