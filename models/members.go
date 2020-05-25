@@ -2,6 +2,8 @@ package models
 
 import (
 	"DellDaven_API/repository"
+	"crypto/rand"
+	"fmt"
 	"github.com/astaxie/beego/orm"
 )
 
@@ -16,6 +18,7 @@ type Members struct {
 	Email    string `orm:"column(email);unique" json:"email"`
 	Pass     string `orm:"column(pass)" json:"pass"`
 	Admin    bool   `orm:"column(admin)" json:"admin"`
+	Token    string `orm:"column(token)" json:"token"`
 }
 
 func init() {
@@ -44,10 +47,20 @@ func GetAllUsers() map[string]*Members {
 	return UserList
 }
 
-func Login(user *Members) (err error) {
+func Login(user *Members) error {
 	db := repository.GetSession()
-	err = db.QueryTable(user).Filter("fullname", user.FullName).Filter("pass", user.Pass).One(user)
+	err := db.QueryTable(user).Filter("email", user.Email).Filter("pass", user.Pass).One(user)
+	if err == nil && user.Id != 0 {
+		user.Token = tokenGenerator()
+		db.Update(user, "token")
+	}
 	return err
+}
+
+func tokenGenerator() string {
+	b := make([]byte, 4)
+	rand.Read(b)
+	return fmt.Sprintf("%x", b)
 }
 
 /*

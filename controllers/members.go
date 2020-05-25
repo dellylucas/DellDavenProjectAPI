@@ -101,12 +101,13 @@ func (u *UserController) Login() {
 	err := models.Login(&user)
 	if err == nil {
 		if user.Id != 0 {
-			u.Data["json"] = true
+			user.Pass = ""
+			u.Data["json"] = user
 		} else {
-			u.Data["json"] = false
+			u.Data["json"] = 300
 		}
 	} else {
-		u.Data["json"] = false
+		u.Data["json"] = 300
 	}
 	u.ServeJSON()
 }
